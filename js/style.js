@@ -74,8 +74,9 @@ function loadSong(song, autoplay=false) {
     audioReady = false;
     $('#play').css('opacity', 0.5);
     $('#player-title').text(song.title);
+    $('#play .loading').css('display', 'block');
 
-    audio = new Howl({ src: ['./test/sample.opus'] });
+    audio = new Howl({ src: ['./test/sample.ogg'] });
     $('#slider-value').text(formatTime(0));
     $('#slider-max').text(formatTime(0));
 
@@ -86,6 +87,7 @@ function loadSong(song, autoplay=false) {
         $('#slider-max').text(formatTime(Math.floor(audio.duration())));
         audioReady = true;
         $('#play').css('opacity', 1);
+        $('#play .loading').css('display', 'none');
     }).on('play', function() { 
         tseek = setInterval(sliderSeek, 1000 / 60);
         $('#play i').removeClass('ti-player-play').addClass('ti-player-pause');
@@ -160,7 +162,7 @@ $(function () {
         fillList(filtered);
     });
 
-    $('body').on('dblclick', '[data-toggle=song]', function (e) {
+    $('body').on('click', '[data-toggle=song]', function (e) {
         if(audio.playing()) audio.stop();
         audio.unload();
         audioIndex = eval($(this).data('target'));
