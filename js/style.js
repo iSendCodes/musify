@@ -2,6 +2,7 @@ const data = [];
 let audioIndex = 0;
 let audio;
 let slider;
+let audioReady = false;
 
 function fillList(data, type = "songs") {
     $('#list').html('');
@@ -69,12 +70,22 @@ let tseek;
 
 function loadSong(song, autoplay=false) {
     slider.value = 0;
+
+    audioReady = false;
+    $('#play').css('opacity', 0.5);
     $('#player-title').text(song.title);
+
     audio = new Howl({ src: ['./test/sample.opus'] });
+    $('#slider-value').text(formatTime(0));
+    $('#slider-max').text(formatTime(0));
+
     if(autoplay) audio.play();
+
     audio.on('load', function() { 
         slider.max = Math.floor(audio.duration());
         $('#slider-max').text(formatTime(Math.floor(audio.duration())));
+        audioReady = true;
+        $('#play').css('opacity', 1);
     }).on('play', function() { 
         tseek = setInterval(sliderSeek, 1000 / 60);
     }).on('end', function () {
@@ -154,7 +165,7 @@ $(function () {
 
     $('#play').click(function (e) { 
         e.preventDefault();
-        if(!audio.playing()) {
+        if(!audio.playing() && audioReady) {
             audio.play();
             $(this).find('i').removeClass('ti-player-play').addClass('ti-player-pause');
         } else {
