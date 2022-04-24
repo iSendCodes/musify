@@ -101,7 +101,7 @@ $(function () {
         let filtered = data.filter((song) => f(song.title) || f(song.artist) || f(song.album));
         $('#content-title').text($(this).val() != "" ? `Search: '${$(this).val()}'` : "Songs");
         $('.side .item.active').removeClass('active');
-        $('.side [href=#songs]').addClass('active');
+        $('.side [href="#songs"]').addClass('active');
         fillList(filtered);
     });
 });
