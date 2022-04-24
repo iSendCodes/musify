@@ -45,7 +45,7 @@ function fillList(data, type = "songs") {
     table.appendTo($('#list'));
 }
 
-$.getJSON("/data/songs.json", null,
+$.getJSON("https://raw.githubusercontent.com/ASU-CIT/test-data/main/songs.json", null,
     function (_data) {
         _data.forEach(element => {
             data.push(element);
