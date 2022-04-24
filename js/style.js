@@ -92,7 +92,7 @@ $(function () {
             type.slice(1)}s</a> / ` + 
             $(this).find('#data').text()
         );
-        let filtered = data.filter((element) => eval(`element.${type}==${new String($(this).find('#data').text())}`))
+        let filtered = data.filter((element) => eval(`element.${type}`) == $(this).find('#data').text())
         fillList(filtered);
     });
 
