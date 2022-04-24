@@ -4,13 +4,13 @@ let audio;
 let slider;
 let audioReady = false;
 
-function fillList(data, type = "songs") {
+function fillList(_data, type = "songs") {
     $('#list').html('');
     let table = $(`
         <table border=0 cellspacing=0 cellpadding=0>
         </table>
     `);
-    data.forEach(element => {
+    _data.forEach(element => {
         let count = 0;
         switch (type) {
             case "albums":
@@ -36,7 +36,7 @@ function fillList(data, type = "songs") {
             case "songs":
             default:
                 let song = $(`
-                    <tr class="card" id="${element.rank}">
+                    <tr class="card" data-toggle="song" data-target="${data.indexOf(element)}">
                         <td>${element.rank}</td>
                         <td>${element.title}</td>
                         <td class="sm-none">${element.artist}</td>
@@ -88,10 +88,16 @@ function loadSong(song, autoplay=false) {
         $('#play').css('opacity', 1);
     }).on('play', function() { 
         tseek = setInterval(sliderSeek, 1000 / 60);
+        $('#play i').removeClass('ti-player-play').addClass('ti-player-pause');
     }).on('end', function () {
         clearInterval(tseek);
+        $('#play i').removeClass('ti-player-pause').addClass('ti-player-play');
     }).on('pause', function () {
         clearInterval(tseek);
+        $('#play i').removeClass('ti-player-pause').addClass('ti-player-play');
+    }).on('stop', function () {
+        clearInterval(tseek);
+        $('#play i').removeClass('ti-player-pause').addClass('ti-player-play');
     });
 
     let drag = false
@@ -154,6 +160,13 @@ $(function () {
         fillList(filtered);
     });
 
+    $('body').on('dblclick', '[data-toggle=song]', function (e) {
+        if(audio.playing()) audio.stop();
+        audio.unload();
+        audioIndex = eval($(this).data('target'));
+        loadSong(data[audioIndex], true);
+    });
+
     $('input[name="search"]').on('input', function (e) {
         let f = (a) => a.toLowerCase().startsWith($(this).val().toLowerCase());
         let filtered = data.filter((song) => f(song.title) || f(song.artist) || f(song.album));
@@ -165,13 +178,8 @@ $(function () {
 
     $('#play').click(function (e) { 
         e.preventDefault();
-        if(!audio.playing() && audioReady) {
-            audio.play();
-            $(this).find('i').removeClass('ti-player-play').addClass('ti-player-pause');
-        } else {
-            audio.pause();
-            $(this).find('i').removeClass('ti-player-pause').addClass('ti-player-play');
-        }
+        if(!audio.playing() && audioReady) audio.play();
+        else audio.pause();
     });
 
     $('#next').click(function (e) { 
