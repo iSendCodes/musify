@@ -1,4 +1,7 @@
 const data = [];
+let audioIndex = 0;
+let audio;
+let slider;
 
 function fillList(data, type = "songs") {
     $('#list').html('');
@@ -52,10 +55,54 @@ $.getJSON("https://raw.githubusercontent.com/ASU-CIT/test-data/main/songs.json",
         });
 
         fillList(data);
+
+        if(data.length > 0) loadSong(data[audioIndex]);
     }
 );
 
+let formatTime = (s) => (s - (s %= 60)) / 60 + (9 < s ? ':' : ':0') + s;
+function sliderSeek() { 
+    slider.value = Math.floor(audio.seek());
+    $('#slider-value').text(formatTime(Math.floor(audio.seek())));
+}
+let tseek;
+
+function loadSong(song, autoplay=false) {
+    slider.value = 0;
+    $('#player-title').text(song.title);
+    audio = new Howl({ src: ['./test/sample.opus'] });
+    if(autoplay) audio.play();
+    audio.on('load', function() { 
+        slider.max = Math.floor(audio.duration());
+        $('#slider-max').text(formatTime(Math.floor(audio.duration())));
+    }).on('play', function() { 
+        tseek = setInterval(sliderSeek, 1000 / 60);
+    }).on('end', function () {
+        clearInterval(tseek);
+    }).on('pause', function () {
+        clearInterval(tseek);
+    });
+
+    let drag = false
+    let playingBeforeDrag = false
+
+    $(slider).mousedown(function () {
+        playingBeforeDrag = audio.playing();
+        if(playingBeforeDrag) audio.pause();
+        drag = true;
+    });
+
+    $(slider).mouseup(function () {
+        if(drag) {
+            audio.seek(slider.value);
+            if(playingBeforeDrag) audio.play();
+            drag = false;
+        }
+    });
+}
+
 $(function () {
+    slider = document.getElementById('slider');
     $('.side .item:not(.disabled)').click(function (e) {
         e.preventDefault();
         $('.side .item.active').removeClass('active');
@@ -103,5 +150,38 @@ $(function () {
         $('.side .item.active').removeClass('active');
         $('.side [href="#songs"]').addClass('active');
         fillList(filtered);
+    });
+
+    $('#play').click(function (e) { 
+        e.preventDefault();
+        if(!audio.playing()) {
+            audio.play();
+            $(this).find('i').removeClass('ti-player-play').addClass('ti-player-pause');
+        } else {
+            audio.pause();
+            $(this).find('i').removeClass('ti-player-pause').addClass('ti-player-play');
+        }
+    });
+
+    $('#next').click(function (e) { 
+        e.preventDefault();
+        let playing = audio.playing();
+        if(audio.playing()) audio.stop();
+        audio.unload();
+
+        audioIndex++;
+        if(audioIndex >= data.length) audioIndex = 0;
+        loadSong(data[audioIndex], playing);
+    });
+
+    $('#prev').click(function (e) { 
+        e.preventDefault();
+        let playing = audio.playing();
+        if(audio.playing()) audio.stop();
+        audio.unload();
+
+        audioIndex--;
+        if(audioIndex < 0) audioIndex = data.length - 1;
+        loadSong(data[audioIndex], playing);
     });
 });
