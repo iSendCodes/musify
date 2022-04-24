@@ -99,7 +99,7 @@ $(function () {
     $('input[name="search"]').on('input', function (e) {
         let f = (a) => a.toLowerCase().startsWith($(this).val().toLowerCase());
         let filtered = data.filter((song) => f(song.title) || f(song.artist) || f(song.album));
-        $('#content-title').text(`Search: '${this.val()}'`)
+        $('#content-title').text(`Search: '${$(this).val()}'`)
         fillList(filtered);
     });
 });
